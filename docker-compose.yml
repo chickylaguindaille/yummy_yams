@@ -4,12 +4,12 @@ services:
   api:
     build: ./api
     ports:
-      - 5173:5173
+      - 3001:3001
     volumes:
       - ./api:/usr/src/app
     environment:
       - NODE_ENV=development
-      - PORT=5173
+      - PORT=3001
     depends_on:
       - mongo
 
