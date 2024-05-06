@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const argon2 = require('argon2');
+const jwt = require('jsonwebtoken');
 
 exports.signup = (req, res, next) => {
     argon2.hash(req.body.password, 10)
@@ -28,7 +29,11 @@ exports.login = (req, res, next) => {
                 }
                 res.status(200).json({
                     userId: user._id,
-                    token: 'TOKEN'
+                    token: jwt.sign(
+                        { userId: user._id },
+                        'RANDOM_TOKEN_SECRET',
+                        { expiresIn: '1h' }
+                    )
                 });
             })
             .catch(error => res.status(500).json({ error }));

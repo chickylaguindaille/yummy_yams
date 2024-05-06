@@ -51,11 +51,11 @@ Chaque pâtisserie pourra être associée à un gagnant (donc un utilisateur exi
 
 ## Contraintes techniques
 
-- L'architecture du projet doit être Dockerisée (avec un fichier `docker-compose.yml` pour lancer le projet)
-- Le back-end doit être écrit en Node.js avec Express, et fonctionner comme une API
+<!-- - L'architecture du projet doit être Dockerisée (avec un fichier `docker-compose.yml` pour lancer le projet) -->
+<!-- - Le back-end doit être écrit en Node.js avec Express, et fonctionner comme une API -->
 - Le front-end doit être écrit en React, avec un state manager (Redux/RTK) pour conserver les informations de l'utilisateur connecté et l'état applicatif tout au long du jeu
 - TypeScript doit être utilisé pour au moins le front-end ou le back-end (ou les deux)
-- Les données doivent être stockées dans une base de données MongoDB, et manipulées avec Mongoose
+<!-- - Les données doivent être stockées dans une base de données MongoDB, et manipulées avec Mongoose -->
 - Les appels vers l'API doivent être sécurisés avec un système de token JWT
   - Un utilisateur qui se connecte doit donc recevoir un token JWT qu'il devra renvoyer à chaque requête pour prouver son identité. Ce token doit être stocké dans le local storage du navigateur, et dispose d'une durée de validité de 1h00
 
@@ -68,7 +68,7 @@ Chaque pâtisserie pourra être associée à un gagnant (donc un utilisateur exi
 
 ### Niveau développement
 
-- Les mots de passe des utilisateurs doivent être hachés avec une fonction de hachage comme `bcrypt` ou `argon2` avant d'être stockés dans la base de données
+<!-- - Les mots de passe des utilisateurs doivent être hachés avec une fonction de hachage comme `bcrypt` ou `argon2` avant d'être stockés dans la base de données -->
 - Les tokens JWT doivent être signés avec une clé secrète et vérifiés à chaque requête pour éviter toute tentative de falsification
 - Les informations sensibles (identifiants de connexion à la base, clés secrètes, etc.) ne doivent pas être exposées dans le code source et stockés dans un fichier `.env`
 
