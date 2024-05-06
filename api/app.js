@@ -1,11 +1,13 @@
 const express = require('express');
 const yummyRoutes = require('./routes/route');
+const userRoutes = require('./routes/user');
 
 const app = express();
 
 app.use(express.json());
 
-app.use('/api', yummyRoutes);
+app.use('/api/yummy', yummyRoutes);
+app.use('/api/auth', userRoutes);
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -19,25 +21,25 @@ app.use((req, res, next) => {
 //     res.send('Bienvenue sur votre backend !');
 // });
 
-app.use('/api', (req, res, next) => {
-    const stuff = [
-        {
-          "_id": 1,
-          "name": "Fondant suprême",
-          "image": "fondant.jpeg",
-          "stock": 4,
-          "quantityWon": 0
-        },
-        {
-          "_id": 2,
-          "name": "Cake tout Chocolat",
-          "image": "cake-choco.jpeg",
-          "stock": 3,
-          "quantityWon": 0
-        },
-      ];
-    res.status(200).json(stuff);
-  });
+// app.use('/api', (req, res, next) => {
+//     const stuff = [
+//         {
+//           "_id": 1,
+//           "name": "Fondant suprême",
+//           "image": "fondant.jpeg",
+//           "stock": 4,
+//           "quantityWon": 0
+//         },
+//         {
+//           "_id": 2,
+//           "name": "Cake tout Chocolat",
+//           "image": "cake-choco.jpeg",
+//           "stock": 3,
+//           "quantityWon": 0
+//         },
+//       ];
+//     res.status(200).json(stuff);
+//   });
 
 
 //Mongoose
