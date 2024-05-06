@@ -1,4 +1,4 @@
-db.yummy.insertMany([
+db.yummies.insertMany([
     {
       "name": "Fondant suprême",
       "image": "fondant.jpeg",
