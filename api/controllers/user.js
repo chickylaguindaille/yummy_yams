@@ -14,6 +14,7 @@ exports.signup = async (req, res, next) => {
             lastName: req.body.lastName,
             email: req.body.email,
             password: hashedPassword,
+            try: 3,
             pastriesWon: [],
         });
         await user.save();
@@ -76,6 +77,7 @@ exports.getOneUser = (req, res, next) => {
   exports.modifyUser = (req, res, next) => {
     const user = new User({
       _id: req.params.id,
+      try: req.body.try,
       pastriesWon: req.body.pastriesWon,
     });
     User.updateOne({_id: req.params.id}, user).then(

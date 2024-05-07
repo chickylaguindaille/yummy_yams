@@ -28,10 +28,12 @@ const Login = () => {
         const data = await login(values.email, values.password);
         console.log('Connexion réussie', data);
         setIsLoggedIn(true); // Mettre à jour l'état pour indiquer que l'utilisateur est connecté
+        localStorage.setItem('userId', data.userId);
       } else {
         const data = await register(values.email, values.password, values.firstName, values.lastName);
         console.log('Inscription réussie', data);
         setIsLoggedIn(true); // Mettre à jour l'état pour indiquer que l'utilisateur est connecté après l'inscription
+        localStorage.setItem('userId', data.userId);
       }
     } catch (error) {
       console.error('Erreur', /*error.message*/);

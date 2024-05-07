@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const yummyRoutes = require('./routes/route');
 const userRoutes = require('./routes/user');
+const diceRoutes = require('./routes/dice');
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 
 app.use('/api/yummy', yummyRoutes);
 app.use('/api/auth', userRoutes);
+app.use('/api/dice', diceRoutes);
 
 //Mongoose
 
