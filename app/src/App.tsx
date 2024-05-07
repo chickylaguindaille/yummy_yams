@@ -1,58 +1,78 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-// import './App.css'
+// import React from 'react';
+import { Container, Typography, TextField, Button, Grid } from '@mui/material';
+import { Formik, Form, Field, FormikHelpers } from 'formik';
+import { login } from './authService'; // Importez la fonction login
 
-// function App() {
-//   const [count, setCount] = useState(0)
-
-//   return (
-//     <>
-//       <div>
-//         <a href="https://vitejs.dev" target="_blank">
-//           <img src={viteLogo} className="logo" alt="Vite logo" />
-//         </a>
-//         <a href="https://react.dev" target="_blank">
-//           <img src={reactLogo} className="logo react" alt="React logo" />
-//         </a>
-//       </div>
-//       <h1>Vite + React</h1>
-//       <div className="card">
-//         <button onClick={() => setCount((count) => count + 1)}>
-//           count is {count}
-//         </button>
-//         <p>
-//           Edit <code>src/App.tsx</code> and save to test HMR
-//         </p>
-//       </div>
-//       <p className="read-the-docs">
-//         Click on the Vite and React logos to learn more
-//       </p>
-//     </>
-//   )
-// }
-
-// export default App
-
-// App.tsx
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './components/Login';
-// import Home from './components/Home';
-// import Profile from './components/Profile';
-
-function App() {
-  return (
-    <Router>
-      <div>
-        <Routes>
-          <Route path="/login" element={<React.Fragment><Login /></React.Fragment>} />
-          {/* { <Route path="/home" component={Home} /> */}
-          {/* <Route path="/profile" component={Profile} /> }*/}
-        </Routes>
-      </div>
-    </Router>
-  );
+interface LoginFormValues {
+  email: string;
+  password: string;
 }
 
-export default App;
+const initialValues: LoginFormValues = {
+  email: '',
+  password: '',
+};
+
+const Login = () => {
+  const handleSubmit = async (values: LoginFormValues, actions: FormikHelpers<LoginFormValues>) => {
+    try {
+      const data = await login(values.email, values.password);
+      console.log('Connexion réussie', data); // Traitez la réponse de l'API ici, par exemple, stockez les informations de l'utilisateur dans le contexte ou les cookies
+    } catch (error) {
+      console.error('Erreur de connexion'/*, error.message*/); // Gérez les erreurs de connexion, par exemple, affichez un message d'erreur à l'utilisateur
+    } finally {
+      actions.setSubmitting(false); // Arrêtez l'indicateur de soumission, indépendamment du succès ou de l'échec de la connexion
+    }
+  };
+
+  return (
+    <Container maxWidth="xs">
+      <Typography variant="h4" align="center" gutterBottom>
+        Connexion
+      </Typography>
+      <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+        {({ isSubmitting }) => (
+          <Form>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Field
+                  as={TextField}
+                  name="email"
+                  label="Email"
+                  type="email"
+                  variant="outlined"
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Field
+                  as={TextField}
+                  name="password"
+                  label="Mot de passe"
+                  type="password"
+                  variant="outlined"
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  disabled={isSubmitting}
+                >
+                  Se connecter
+                </Button>
+              </Grid>
+            </Grid>
+          </Form>
+        )}
+      </Formik>
+    </Container>
+  );
+};
+
+export default Login;

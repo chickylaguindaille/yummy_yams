@@ -5,6 +5,8 @@ const userRoutes = require('./routes/user');
 
 const app = express();
 
+app.use(cors());
+
 app.use(express.json());
 
 app.use('/api/yummy', yummyRoutes);
@@ -16,9 +18,6 @@ app.use('/api/auth', userRoutes);
 //   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 //   next();
 // });
-
-app.use(cors());
-
 
 // Définition de la route principale
 // app.get('/', (req, res) => {
