@@ -41,11 +41,10 @@ exports.getOneYummy = (req, res, next) => {
   exports.modifyYummy = (req, res, next) => {
     const yummy = new Yummy({
       _id: req.params.id,
-      title: req.body.title,
-      description: req.body.description,
-      imageUrl: req.body.imageUrl,
-      price: req.body.price,
-      userId: req.body.userId
+      name: req.body.name,
+      image: req.body.image,
+      stock: req.body.stock,
+      quantityWon: req.body.quantityWon
     });
     Yummy.updateOne({_id: req.params.id}, yummy).then(
       () => {
