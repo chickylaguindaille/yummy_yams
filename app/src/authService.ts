@@ -1,9 +1,9 @@
-import bcrypt from 'bcryptjs'; // Importez bcryptjs
+// import bcrypt from 'bcryptjs'; // Importez bcryptjs
 
 export const login = async (email: string, password: string) => {
   try {
     // Cryptez le mot de passe avant de l'envoyer au serveur
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
 
     // Ensuite, envoyez le mot de passe crypté au serveur
     const apiUrl = "http://localhost:3001/api/auth/login";
@@ -17,7 +17,8 @@ export const login = async (email: string, password: string) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password: hashedPassword }), // Envoyez le mot de passe crypté
+      body: JSON.stringify({ email, password }), // Envoyez le mot de passe crypté
+      // body: JSON.stringify({ email, password: hashedPassword }), // Envoyez le mot de passe crypté
     });
 
     if (!response.ok) {
