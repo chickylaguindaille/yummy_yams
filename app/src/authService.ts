@@ -31,3 +31,32 @@ export const login = async (email: string, password: string) => {
     throw new Error('Une erreur s\'est produite lors de la connexion.'); // Gérez les erreurs de requête
   }
 };
+
+
+export const register = async (email: string, password: string, firstName: string, lastName: string) => {
+  try {
+    // Ensuite, envoyez les informations de l'utilisateur au serveur pour l'enregistrement
+    const apiUrl = "http://localhost:3001/api/auth/signup";
+
+    if (!apiUrl) {
+      throw new Error('L\'URL de l\'API n\'est pas définie.'); // Gérez l'absence d'URL de l'API
+    }
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password, firstName, lastName }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de l\'enregistrement de l\'utilisateur'); // Gérez les erreurs de l'API selon votre cas
+    }
+
+    const data = await response.json();
+    return data; // Vous pouvez retourner des données supplémentaires de l'utilisateur ici si nécessaire
+  } catch (error) {
+    throw new Error('Une erreur s\'est produite lors de l\'enregistrement de l\'utilisateur'); // Gérez les erreurs de requête
+  }
+};
