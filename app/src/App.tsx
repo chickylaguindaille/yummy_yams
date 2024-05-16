@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Container, Typography, TextField, Button, Grid } from '@mui/material';
 import { Formik, Form, Field, FormikHelpers } from 'formik';
 import { login, register } from './authService'; // Importer les fonctions login et register
@@ -27,13 +27,15 @@ const Login = () => {
       if (isLogin) {
         const data = await login(values.email, values.password);
         console.log('Connexion réussie', data);
-        setIsLoggedIn(true); // Mettre à jour l'état pour indiquer que l'utilisateur est connecté
         localStorage.setItem('userId', data.userId);
+        localStorage.setItem('token', data.token);
+        setIsLoggedIn(true); // Mettre à jour l'état pour indiquer que l'utilisateur est connecté
       } else {
         const data = await register(values.email, values.password, values.firstName, values.lastName);
         console.log('Inscription réussie', data);
-        setIsLoggedIn(true); // Mettre à jour l'état pour indiquer que l'utilisateur est connecté après l'inscription
         localStorage.setItem('userId', data.userId);
+        localStorage.setItem('token', data.token);
+        setIsLoggedIn(true); // Mettre à jour l'état pour indiquer que l'utilisateur est connecté après l'inscription
       }
     } catch (error) {
       console.error('Erreur', /*error.message*/);
@@ -51,9 +53,9 @@ const Login = () => {
       {isLoggedIn ? (
         <div>
           <Typography variant="h4" align="center" gutterBottom>
-            Vous êtes connecté
+            Bienvenue dans le Yummy Yam's
           </Typography>
-          <DiceGame /> {/* Afficher le jeu de dés uniquement si l'utilisateur est connecté */}
+          <DiceGame />
         </div>
       ) : (
         <div>

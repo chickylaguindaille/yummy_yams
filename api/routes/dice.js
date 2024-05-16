@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const Patisserie = require('../models/yummy');
+const middleware = require('../middleware/auth');
 
 // Route pour le tirage des dés
-router.get('/roll/:id', async (req, res) => {
+router.get('/roll/:id', middleware.auth, async (req, res) => {
   // Récupérer l'ID de l'utilisateur depuis les paramètres de l'URL
   const userId = req.params.id;
   
@@ -31,12 +32,12 @@ router.get('/roll/:id', async (req, res) => {
         let successMessage = '';
         if (isYams(diceValues)) {
           successMessage = 'YAM\'S (5/5 dés identiques 🎲🎲🎲🎲🎲) : Félicitations ! Vous avez gagné 3 pâtisseries.';
-          getRandomPatisseries(3);
+          getRandomPatisseries(userId, 3);
         } else if (isCarre(diceValues)) {
-          getRandomPatisseries(2);
+          getRandomPatisseries(userId, 2);
           successMessage = 'CARRÉ (4/5 dés identiques 🎲🎲🎲🎲) : Félicitations ! Vous avez gagné 2 pâtisseries.';
         } else if (isDouble(diceValues)) {
-          getRandomPatisseries(1);
+          getRandomPatisseries(userId, 1);
           successMessage = 'DOUBLE (2 paires de dés identiques 🎲🎲 + 🎲🎲) : Félicitations ! Vous avez gagné 1 pâtisserie.';
         }
 
@@ -101,38 +102,101 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-async function getRandomPatisseries(numPatisseries) {
+async function getRandomPatisseries(userId, numPatisseries) {
   try {
-    // Utiliser l'agrégation MongoDB pour sélectionner les pâtisseries en stock
-    const patisseriesEnStock = await Patisserie.aggregate([
-      { $match: { stock: { $gt: 0 } } }, // Filtrer les pâtisseries avec un stock supérieur à zéro
-      { $sample: { size: numPatisseries } } // Sélectionner un échantillon aléatoire du nombre spécifié de pâtisseries
-    ]);
+    let stockEmpty = false; // Variable pour suivre l'état du stock
 
-    // Mettre à jour le stock et la quantité gagnée pour chaque pâtisserie sélectionnée
-    await Promise.all(patisseriesEnStock.map(async (patisserie) => {
+    for (let i = 0; i < numPatisseries; i++) {
+      // Utiliser l'agrégation MongoDB pour sélectionner une pâtisserie en stock au hasard
+      const patisserieEnStock = await Patisserie.aggregate([
+        { $match: { stock: { $gt: 0 } } }, // Filtrer les pâtisseries avec un stock supérieur à zéro
+        { $sample: { size: 1 } } // Sélectionner un échantillon aléatoire d'une pâtisserie
+      ]);
+
+      // Si aucune pâtisserie n'est disponible, arrêtez la boucle
+      if (patisserieEnStock.length === 0) {
+        console.log("Plus de pâtisseries en stock.");
+        stockEmpty = true;
+        break;
+      }
+
+      const patisserie = patisserieEnStock[0];
       // Enlever un du stock
       const updatedStock = patisserie.stock - 1;
       // Augmenter de 1 la quantité gagnée
       const updatedQuantityWon = patisserie.quantityWon + 1;
-      // Mettre à jour la pâtisserie dans la base de données en utilisant votre route PUT
-      const response = await fetch(`http://localhost:3001/api/yummy/${patisserie._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ stock: updatedStock, quantityWon: updatedQuantityWon })
-      });
-      const data = await response.json();
-      console.log('Pâtisserie mise à jour :', data);
-    }));
 
-    // Afficher les pâtisseries sélectionnées
-    console.log('Pâtisseries sélectionnées :', patisseriesEnStock);
+      try {
+
+        const yummyApiUrl = process.env.YUMMY_API_URL;
+
+        // Mettre à jour la pâtisserie dans la base de données en utilisant votre route PUT
+        const response = await fetch(`${yummyApiUrl}/${patisserie._id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': ''
+          },
+          body: JSON.stringify({ stock: updatedStock, quantityWon: updatedQuantityWon })
+        });
+
+        // Vérifiez le statut de la réponse HTTP
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP ! statut : ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Pâtisserie sélectionnée :', patisserie);
+
+        // console.log(patisseries);
+        await addPatisseriesToUser(userId, patisserie);
+        
+      } catch (error) {
+        console.error(`Erreur lors de la mise à jour de la pâtisserie avec ID ${patisserie._id} :`, error.message);
+      }
+    }
+
+    if (stockEmpty) {
+      // const diceValues = conditionRollDice(userData);
+      return "Plus de pâtisseries en stock.";
+    }
   } catch (error) {
-    console.error('Erreur lors de la récupération des pâtisseries en stock :', error);
+    console.error('Erreur lors de la récupération des pâtisseries en stock :', error.message);
   }
 }
+
+
+async function addPatisseriesToUser(userId, patisserie) {
+  try {
+    const currentDate = new Date();
+
+    // Formater la date en format européen avec le fuseau horaire de Paris
+    const options = { 
+      timeZone: 'Europe/Paris', 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric',
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    };
+
+    const formattedDate = currentDate.toLocaleDateString('fr-FR', options);
+
+    patisserie.date = formattedDate;
+
+    const userData = await User.findByIdAndUpdate(userId, { $push: { pastriesWon: patisserie } }, { new: true });
+
+    console.log('Utilisateur mis à jour avec les pâtisseries gagnées :', userData);
+  
+  } catch (error) {
+    console.error('Erreur lors de l\'ajout des pâtisseries à l\'utilisateur :', error.message);
+    throw error;
+  }
+}
+
+
 
 
 module.exports = router;

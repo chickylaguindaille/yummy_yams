@@ -20,8 +20,8 @@ exports.signup = async (req, res, next) => {
         await user.save();
         const token = jwt.sign(
             { userId: user._id },
-            'RANDOM_TOKEN_SECRET',
-            // process.env.RANDOM_TOKEN_SECRET,
+            // 'RANDOM_TOKEN_SECRET',
+            process.env.RANDOM_TOKEN_SECRET,
             { expiresIn: '1h' }
         );
         res.status(201).json({ message: 'Utilisateur créé !', token: token });
@@ -45,8 +45,8 @@ exports.login = (req, res, next) => {
                     userId: user._id,
                     token: jwt.sign(
                         { userId: user._id },
-                        'RANDOM_TOKEN_SECRET',
-                        // process.env.RANDOM_TOKEN_SECRET,
+                        // 'RANDOM_TOKEN_SECRET',
+                        process.env.RANDOM_TOKEN_SECRET,
                         { expiresIn: '1h' }
                     )
                 });

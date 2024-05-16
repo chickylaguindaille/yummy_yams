@@ -1,18 +1,49 @@
-import React, { useState } from 'react';
-import { Button, Typography } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 const DiceGame = () => {
   const [remainingAttempts, setRemainingAttempts] = useState(3);
   const [wonPastries, setWonPastries] = useState(0);
   const [diceValues, setDiceValues] = useState([] as number[]);
+  const [users, setUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Charger la liste des utilisateurs lorsque le composant est monté
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+        const userToken = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3001/api/auth', {
+          headers: {
+            'Authorization': `Bearer ${userToken}` // Inclure le token dans l'en-tête Authorization
+          }
+        })
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        console.error('Erreur lors du chargement des utilisateurs :', error);
+      }
+    };
 
   const rollDice = () => {
     if (remainingAttempts === 0) return;
 
     const userId = localStorage.getItem('userId');
+    const userToken = localStorage.getItem('token');
 
-    fetch(`http://localhost:3001/api/dice/roll/${userId}`)
-      .then(response => response.json())
+    fetch(`http://localhost:3001/api/dice/roll/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${userToken}` // Inclure le token dans l'en-tête Authorization
+        }
+      })
+      .then(response => {
+        if (response.status === 403) {
+          throw new Error('Vous avez épuisé votre nombre d\'essais');
+        }
+        return response.json();
+      })
       .then(data => {
         setDiceValues(data.diceValues);
 
@@ -52,10 +83,7 @@ const DiceGame = () => {
   // };
 
   return (
-    <div>
-      <Typography variant="h4" gutterBottom>
-        Jeu de Dés
-      </Typography>
+    <div align="center">
       <Typography variant="body1" gutterBottom>
         Tentatives restantes : {remainingAttempts}
       </Typography>
@@ -74,11 +102,32 @@ const DiceGame = () => {
           Félicitations ! Vous avez gagné {wonPastries} pâtisserie{wonPastries > 1 ? 's' : ''}.
         </Typography>
       )}
-      {/* {remainingAttempts === 0 && (
-        <Button variant="contained" color="secondary" onClick={resetGame}>
-          Recommencer
-        </Button>
-      )} */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Nom</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Pâtisseries Gagnées</TableCell> {/* Nouvelle en-tête de colonne */}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user._id}>
+                <TableCell>{user.firstName} {user.lastName}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>
+                  <ul> {/* Liste des pâtisseries gagnées par chaque utilisateur */}
+                    {user.pastriesWon.map((pastry: any) => (
+                      <li key={pastry._id}>{pastry.name}</li>
+                    ))}
+                  </ul>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 };
